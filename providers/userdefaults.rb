@@ -28,7 +28,11 @@ def load_current_resource
   Chef::Log.debug("Checking #{new_resource.domain} value")
   truefalse = 1 if [true, 'TRUE','1','true','YES','yes'].include?(new_resource.value)
   truefalse = 0 if [false, 'FALSE','0','false','NO','no'].include?(new_resource.value)
-  drcmd = "defaults read '#{new_resource.domain}' "
+  if new_resource.current_host
+    drcmd = "defaults -currentHost read '#{new_resource.domain}' "
+  else
+    drcmd = "defaults read '#{new_resource.domain}' "
+  end
   drcmd << "'#{new_resource.key}' " if new_resource.key
   shell_out_opts = {}
   shell_out_opts[:user] = new_resource.user unless new_resource.user.nil?
@@ -39,7 +43,11 @@ end
 
 action :write do
   unless @userdefaults.is_set
-    cmd = ["defaults write"]
+    if new_resource.current_host
+      cmd = ["defaults -currentHost write"]
+    else
+      cmd = ["defaults write"]
+    end
     cmd.unshift('sudo') if new_resource.sudo
 
     if new_resource.global
