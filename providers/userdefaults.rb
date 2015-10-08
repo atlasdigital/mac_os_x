@@ -59,7 +59,12 @@ action :write do
     cmd << "'#{new_resource.key}'" if new_resource.key
 
     type = new_resource.type
-    value = "'#{new_resource.value}'"
+    unless type == 'dict-add'
+      value = "'#{new_resource.value}'"
+    else
+      value = new_resource.value
+    end
+
     case new_resource.value
     when TrueClass, FalseClass
       type ||= 'bool'
